@@ -49,11 +49,18 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 	 * @return true if the set contained the specified element
 	 */
 	public boolean remove(Object x) {
-		if (super.contains(maxElement) && x==maxElement){
-			for{
-				
+		if (x==maxElement){
+			E secondToMax=null;
+			while (super.iterator().hasNext()){
+				if (super.iterator().next().compareTo(secondToMax)<1){
+					
+					
+				}
 			}
 			
+		} else if (super.contains(maxElement)){
+			super.remove(x);
+			return true;
 		}
 		return false;
 	}
