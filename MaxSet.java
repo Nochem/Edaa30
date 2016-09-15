@@ -54,22 +54,31 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 	 *            the element to remove - if present
 	 * @return true if the set contained the specified element
 	 */
-	public boolean remove(Object x) { //Moms spaghetti. Also seems to contain an infinite loop.
-		 if (super.remove(x)) {
+	public boolean remove(Object x) { // Moms spaghetti
+		if (super.remove(x)) {
 			if (x.equals(maxElement)) {
-				E temp;
-				maxElement = super.iterator().next();
-				while (super.iterator().hasNext()){ //I assume this is where the loop happends???
-					temp = super.iterator().next(); 
-					if (temp.compareTo(maxElement) > 0) {
-						maxElement = temp;
-					}
-				}
+				findNewMax();
 			}
 			return true;
 		}
 		return false;
 	}
+
+	private void findNewMax() {
+		E temp;
+		Iterator<E> iter = super.iterator();
+		if (iter.hasNext()) {
+			maxElement = iter.next();
+			while (iter.hasNext()) {
+				temp = iter.next();
+				if (temp.compareTo(maxElement) > 0) {
+					maxElement = temp;
+				}
+			}
+
+		}
+	}
+
 
 	/**
 	 * Adds all of the elements in the specified set, for which it is possible,
@@ -86,5 +95,11 @@ public class MaxSet<E extends Comparable<E>> extends ArraySet<E> {
 		}
 		return super.addAll(c);
 	}
+	
+	
+	public static int[] uniqueElements(int[] ints) {
+		return null;
+	}
+
 
 }
