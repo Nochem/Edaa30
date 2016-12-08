@@ -1,8 +1,9 @@
 package phonebook;
 
+import java.io.Serializable;
 import java.util.Set;
 
-public interface PhoneBook {
+public interface PhoneBook extends Serializable {
 	/** 
 	 * Associates the specified number with the specified 
 	 * name in this phone book. 
@@ -78,6 +79,8 @@ public interface PhoneBook {
 	 * @return The number of names in this phone book
 	 */
 	public int size();
+
+
 
 }
 
