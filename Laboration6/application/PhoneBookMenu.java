@@ -1,6 +1,8 @@
 package application;
 
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.TreeSet;
 
 import javafx.application.Platform;
 import javafx.scene.control.Menu;
@@ -42,6 +44,10 @@ public class PhoneBookMenu extends MenuBar {
 		final MenuItem findName = new MenuItem("Find Name");
 		findName.setOnAction(e -> findName());
 		menuFind.getItems().addAll(findName);
+		
+		final MenuItem findNames = new MenuItem("Find Names");
+		findNames.setOnAction(e -> findNames());
+		menuFind.getItems().addAll(findNames);
 
 		getMenus().addAll(menuPhoneBook, menuFind);
 		setUseSystemMenuBar(true); // if you want operating system rendered menus, uncomment this line
@@ -68,6 +74,25 @@ public class PhoneBookMenu extends MenuBar {
 			Dialogs.alert("Name not found", null, "There is no such name in the book");
 		} else {
 			nameListView.fillList(phoneBook.findNames(result.get()));
+			nameListView.clearSelection();
+		}
+	}
+	
+	private void findNames() {
+		Optional<String> result = Dialogs.oneInputDialog("Find name", "Enter part of name", "Starts with");
+		if (result == null) {
+			Dialogs.alert("Name not found", null, "There is no such name in the book");
+		} else { 
+			TreeSet<String> rSet = new TreeSet<String>();
+			Iterator<String> itr = phoneBook.names().iterator();
+			while (itr.hasNext()){
+				String n = itr.next();
+				if (n.contains(result.get())){
+					rSet.add(n);
+				}
+			}
+			
+			nameListView.fillList(rSet);
 			nameListView.clearSelection();
 		}
 	}

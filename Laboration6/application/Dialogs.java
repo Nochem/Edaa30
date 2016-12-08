@@ -97,7 +97,7 @@ public class Dialogs {
 			public String call(ButtonType b) {
 				String inputs = null;
 				if (b == buttonTypeOk) {
-					if (tf1.getText().equals("") || tf2.getText().equals("")) {
+					if (tf1.getText().equals("") && tf2.getText().equals("")) {
 						return null;
 					}
 					inputs = tf1.getText() + ":" + tf2.getText();				

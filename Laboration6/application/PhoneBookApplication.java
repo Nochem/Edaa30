@@ -1,10 +1,13 @@
 package application;
+import java.awt.Component;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Locale;
 import java.util.Optional;
+
+import javax.swing.JFileChooser;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -54,8 +57,9 @@ public class PhoneBookApplication extends Application{
 	}
 	
 	private void save(){
+		Optional<String> result = Dialogs.oneInputDialog("Save File", "Enter filename", "Name" );
 		try {
-			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("saveFile"));
+			ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(result.get()));
 			out.writeObject(phoneBook);
 			out.close();
 		} catch (Exception e) {
@@ -65,8 +69,12 @@ public class PhoneBookApplication extends Application{
 	}
 	
 	private boolean load(){
+		Component comp = null;
+		JFileChooser choose = new JFileChooser("/home/nochem/workspaces/edaa30-workspace/lab6");
+		@SuppressWarnings("unused")
+		int i = choose.showOpenDialog(comp);
 		try {
-			ObjectInputStream in = new ObjectInputStream(new FileInputStream("saveFile"));
+			ObjectInputStream in = new ObjectInputStream(new FileInputStream(choose.getSelectedFile().toString()));
 			phoneBook = (PhoneBook) in.readObject();
 			in.close();
 			return true;
