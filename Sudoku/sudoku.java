@@ -24,9 +24,9 @@ public class sudoku {
 		int row = 0, col = 0, tryNbr = 1;
 		return selectNbrRecursive(row, col);
 	}
-
+ 	
+	
 	private boolean rowCheck(int row, int tryNbr) {
-		System.out.println(row +"row");
 		for (int i = 0; i < 9; i++) {
 			if (matrix[row][i] == tryNbr) {
 				return false;
@@ -86,7 +86,6 @@ public class sudoku {
 		for (int k=0; k<9; k++){ //i goes from 1 to 9, attempting to place a number
 			if (rowCheck(row, i) && colCheck(col, i) && clusterCheck(row, col, i)) {//Checks if i can be placed
 				put(row, col, i); //places i
-				System.out.println(i);
 				success=true;
 				break; //breaks for loop
 			}
@@ -97,8 +96,9 @@ public class sudoku {
 				return true;
 			}
 			itr.next();
+			int curRow= itr.currentRow; int curCol=itr.currentCol;
 			while (i<10){ //preparation for the case that the next position failed
-				if (selectNbrRecursive(itr.currentRow,itr.currentCol)){//launches a child on the next gridposition
+				if (selectNbrRecursive(curRow,curCol)){//launches a child on the next gridposition
 					return true; //if child returns true the solution has been found
 				} else {
 					i++; //if child returns false, parent will increase it's int and try again
@@ -108,9 +108,12 @@ public class sudoku {
 				}
 			}
 			i=1;
+			put(row, col, 0);
+			if (itr.hasPrevious()){
+				itr.previous();
+			}
 			 //If here the child cannot place any number no matter what int the parent holds
-		}
-		put(row, col, 0);						//EG the problem is further back
+		}						//EG the problem is further back
 		return false;			//false is returned to parent's parent.		
 	}			
 	
@@ -125,8 +128,6 @@ public class sudoku {
 		}
 
 		public Integer next(){
-			
-			
 			if (currentCol<8){
 				currentCol++;
 			} else {
@@ -135,7 +136,24 @@ public class sudoku {
 			}
 			return matrix[currentRow][currentCol];
 		}
-	
+		
+		public Integer previous(){
+			if (currentCol>0){
+				currentCol--;
+			} else {
+				currentCol=8;
+				currentRow--;
+			}
+			return matrix[currentRow][currentCol];
+		}
+		
+		public boolean hasPrevious(){
+			if (currentRow==0 && currentCol==0){
+				return false;
+			}
+			return true;
+		}
+		
 		public boolean hasNext(){
 			if (currentRow==8 && currentCol==8){
 				return false;
