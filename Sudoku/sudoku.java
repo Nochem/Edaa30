@@ -1,7 +1,5 @@
 package sudokuMain;
 
-import java.util.EmptyStackException;
-
 public class sudoku {
 	static int matrix[][];
 	private Iterator itr;
@@ -21,11 +19,11 @@ public class sudoku {
 	}
 
 	public boolean backtracking() {
-		int row = 0, col = 0, tryNbr = 1;
-		return selectNbrRecursive(row, col);
+		int row = 0, col = 0;
+		return solve(row, col);
 	}
- 	
-	
+
+
 	private boolean rowCheck(int row, int tryNbr) {
 		for (int i = 0; i < 9; i++) {
 			if (matrix[row][i] == tryNbr) {
@@ -80,28 +78,41 @@ public class sudoku {
 	
 	
 	
-	private boolean selectNbrRecursive(int row, int col) {
-		int i=1;
-		boolean success=false;
-		for (int k=0; k<9; k++){ //i goes from 1 to 9, attempting to place a number
-			if (rowCheck(row, i) && colCheck(col, i) && clusterCheck(row, col, i)) {//Checks if i can be placed
-				put(row, col, i); //places i
-				success=true;
-				break; //breaks for loop
+	private boolean solve(int row, int col) {
+		int i=1; boolean success=false;
+		if (get(row,col)>0){
+			if (itr.hasNext()){
+				itr.next();
+				if(solve(itr.currentRow,itr.currentCol)){
+					return true;
+				} else {
+					if (itr.hasPrevious()){
+						itr.previous();
+					}
+					return false;
+				}
 			}
-			i++; //i is used instead of k because of the while loop below. As k is removed after break above
+			return true;
 		}
-		if (success){   // true If current recursion successfully placed an int
+		for (int k=0; k<9; k++){ 													//i goes from 1 to 9, attempting to place a number
+			if (rowCheck(row, i) && colCheck(col, i) && clusterCheck(row, col, i)) {//Checks if i can be placed
+				put(row, col, i); 													//places i
+				success=true;
+				break; 																//breaks for loop
+			}
+			i++; 																	//i is used instead of k because of the while loop below. As k is removed after break above
+		}
+		if (success){   	// true If current recursion successfully placed an int
+			itr.next();
 			if (!itr.hasNext()){
 				return true;
 			}
-			itr.next();
-			int curRow= itr.currentRow; int curCol=itr.currentCol;
-			while (i<10){ //preparation for the case that the next position failed
-				if (selectNbrRecursive(curRow,curCol)){//launches a child on the next gridposition
-					return true; //if child returns true the solution has been found
+			
+			while (i<10){ 															//preparation for the case that the next position failed
+				if (solve(itr.currentRow,itr.currentCol)){							//launches a child on the next gridposition
+					return true; 													//if child returns true the solution has been found
 				} else {
-					i++; //if child returns false, parent will increase it's int and try again
+					i++; 															//if child returns false, parent will increase it's int and try again
 					if (rowCheck(row, i) && colCheck(col, i) && clusterCheck(row, col, i)){
 						put(row, col, i);
 					}		
@@ -115,8 +126,8 @@ public class sudoku {
 			 //If here the child cannot place any number no matter what int the parent holds
 		}						//EG the problem is further back
 		return false;			//false is returned to parent's parent.		
-	}			
-	
+			
+	}
 	
 	
 	private class Iterator implements java.util.Iterator<Integer>{
@@ -124,27 +135,29 @@ public class sudoku {
 		
 		public Iterator() {
 			currentRow=0;
-			currentCol=-1;
+			currentCol=0;
 		}
 
 		public Integer next(){
+			int returnInt=matrix[currentRow][currentCol];
 			if (currentCol<8){
 				currentCol++;
 			} else {
 				currentRow++;
 				currentCol=0;
 			}
-			return matrix[currentRow][currentCol];
+			return returnInt;
 		}
 		
 		public Integer previous(){
+			int returnInt=matrix[currentRow][currentCol];
 			if (currentCol>0){
 				currentCol--;
 			} else {
 				currentCol=8;
 				currentRow--;
 			}
-			return matrix[currentRow][currentCol];
+			return returnInt;
 		}
 		
 		public boolean hasPrevious(){
@@ -155,10 +168,11 @@ public class sudoku {
 		}
 		
 		public boolean hasNext(){
-			if (currentRow==8 && currentCol==8){
+			if (currentRow==9 && currentCol==0){
 				return false;
 			}
 			return true;
 		}
-	}	
+	}
+	
 }
