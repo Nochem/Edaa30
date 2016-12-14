@@ -1,29 +1,33 @@
 package sudokuMain;
 
+
 public class sudoku {
-	static int matrix[][];
+	public static int[][] matrix;
 	private Iterator itr;
 	
+	/**
+	 * Instantiates an empty sudokumatrix and it's iterator.
+	 */
 	public sudoku() {
 		matrix = new int[9][9];
 		itr = new Iterator();
 	}
 	
-	public boolean put(int arg0, int arg1, int arg2) {
-		matrix[arg0][arg1] = arg2;
-		return true;
+	/**
+	 Places a number nbr at location row, col in the sudokumatrix.
+	 */
+	public void put(int row, int col, int nbr) {
+		matrix[row][col] = nbr;
 	}
 
-	public int get(int arg0, int arg1) {
-		return matrix[arg0][arg1];
+	/**
+	Returns a Integer from the position row, col in the sudokumatrix.
+	*/
+	public Integer get(int row, int col) {
+		return matrix[row][col];
 	}
-
-	public boolean backtracking() {
-		int row = 0, col = 0;
-		return solve(row, col);
-	}
-
-
+	
+	//Examines the active row for collisions
 	private boolean rowCheck(int row, int tryNbr) {
 		for (int i = 0; i < 9; i++) {
 			if (matrix[row][i] == tryNbr) {
@@ -33,6 +37,7 @@ public class sudoku {
 		return true;
 	}
 
+	//Examines the active column for collisions
 	private boolean colCheck(int col, int tryNbr) {
 		for (int i = 0; i < 9; i++) {
 			if (matrix[i][col] == tryNbr) {
@@ -42,6 +47,7 @@ public class sudoku {
 		return true;
 	}
 
+	//Examines the active cluster for collisions
 	private boolean clusterCheck(int row, int col, int tryNbr) {
 		row = (row/3)*3; col = (col/3)*3;
 		for (int i = 0; i < 3; i++) {
@@ -54,7 +60,18 @@ public class sudoku {
 		return true;
 	}
 	
+	/**
+	 * Clears out the matrix and resets the iterator.
+	 */
+	public void clear(){
+		int[][] newMatrix= new int[9][9];
+		matrix=newMatrix;
+		itr=new Iterator();
+	}
 	
+	/**
+	 * Returns a string representation of the matrix. Use for debugging.
+	 */
 	public String matrixString(){
 		StringBuilder sb = new StringBuilder();
 		itr = new Iterator();
@@ -74,70 +91,126 @@ public class sudoku {
 		return returnString;
 	}
 
-	
-	
-	
-	
-	private boolean solve(int row, int col) {
-		int i=1; boolean success=false;
+	/**
+	 * Backtracks through the sudoku to find the solution. Behaviour undefined for row and col values other than 0.
+	 * Warning: The backtracker uses a brute force algorithm, returning false can take a -very- long time. 
+	 * Worst case scenario includes 9^81 attempts!
+	 */
+	public boolean solve(int row, int col) {
+		int tryNbr=1; boolean success=false;
+		//Handles pre-input values
 		if (get(row,col)>0){
+			itr.next();
 			if (itr.hasNext()){
-				itr.next();
 				if(solve(itr.currentRow,itr.currentCol)){
 					return true;
 				} else {
-					if (itr.hasPrevious()){
-						itr.previous();
-					}
+					itr.previous();
 					return false;
 				}
 			}
 			return true;
 		}
-		for (int k=0; k<9; k++){ 													//i goes from 1 to 9, attempting to place a number
-			if (rowCheck(row, i) && colCheck(col, i) && clusterCheck(row, col, i)) {//Checks if i can be placed
-				put(row, col, i); 													//places i
+		//Attempts to place a number based on collisions
+		//i goes from 1 to 9
+		for (int k=0; k<9; k++){ 													
+			if (rowCheck(row, tryNbr) && colCheck(col, tryNbr) && clusterCheck(row, col, tryNbr)) {
+				put(row, col, tryNbr); 													
 				success=true;
-				break; 																//breaks for loop
+				break;
 			}
-			i++; 																	//i is used instead of k because of the while loop below. As k is removed after break above
+			tryNbr++;
 		}
-		if (success){   	// true If current recursion successfully placed an int
+		//If an int has been placed and there is a next position it will launch Solve() on the next position
+		if (success){
 			itr.next();
 			if (!itr.hasNext()){
 				return true;
 			}
-			
-			while (i<10){ 															//preparation for the case that the next position failed
-				if (solve(itr.currentRow,itr.currentCol)){							//launches a child on the next gridposition
-					return true; 													//if child returns true the solution has been found
+			while (tryNbr<10){
+				System.out.println(itr.currentRow +""+ itr.currentCol+ " " + tryNbr);
+				//If child solve() fails, it will increase parent solve() by 1 and try again
+				if (solve(itr.currentRow,itr.currentCol)){
+					return true;
 				} else {
-					i++; 															//if child returns false, parent will increase it's int and try again
-					if (rowCheck(row, i) && colCheck(col, i) && clusterCheck(row, col, i)){
-						put(row, col, i);
+					tryNbr++;
+					if (rowCheck(row, tryNbr) && colCheck(col, tryNbr) && clusterCheck(row, col, tryNbr)){
+						put(row, col, tryNbr);
 					}		
 				}
 			}
-			i=1;
+			//If the solve() reaches here, the child has failed no matter what value the parent holds
+			//The parent witll then return false to it's parent that will increase it's number
+			itr.previous();
 			put(row, col, 0);
-			if (itr.hasPrevious()){
-				itr.previous();
+			return false;	
+		}
+		return false;
+	}
+	
+
+	public boolean solveSane(int row, int col, int tryNbr) {
+		boolean success=false;
+		//Handles pre-input values
+		if (get(row,col)>0){
+			itr.next();
+			if (itr.hasNext()){
+				if(solve(itr.currentRow,itr.currentCol)){
+					return true;
+				} else {
+					itr.previous();
+					return false;
+				}
 			}
-			 //If here the child cannot place any number no matter what int the parent holds
-		}						//EG the problem is further back
-		return false;			//false is returned to parent's parent.		
+			return true;
+		}
+		//Attempts to place a number based on collisions
+		//i goes from 1 to 9
+		for (int k=0; k<9; k++){ 													
+			if (rowCheck(row, tryNbr) && colCheck(col, tryNbr) && clusterCheck(row, col, tryNbr)) {
+				put(row, col, tryNbr); 													
+				success=true;
+				break;
+			}
+			tryNbr++;
+		}
+		//If an int has been placed and there is a next position it will launch Solve() on the next position
+		if (success){
+			itr.next();
+			if (!itr.hasNext()){
+				return true;
+			}
+			if (solve(itr.currentRow,itr.currentCol)){
+				return true;
+			}
+			itr.previous();
+			put(row, col, 0);
+			return false;	
+		}
+		return false;
+	}
+	
+	public boolean solveSaneStart(){
+		for (int i=1; i<10; i++){
+			System.out.println("SolveSane" + i);
+			if (solveSane(0,0,i)){
+				return true;
+			}
 			
+		}
+		return false;
 	}
 	
 	
+	
+	//Private nestled iterator class.
 	private class Iterator implements java.util.Iterator<Integer>{
 		int currentRow, currentCol;
-		
 		public Iterator() {
 			currentRow=0;
 			currentCol=0;
 		}
-
+		
 		public Integer next(){
 			int returnInt=matrix[currentRow][currentCol];
 			if (currentCol<8){
@@ -173,6 +246,5 @@ public class sudoku {
 			}
 			return true;
 		}
-	}
-	
+	}	
 }
