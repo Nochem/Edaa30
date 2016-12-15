@@ -115,7 +115,10 @@ public class sudoku {
 		//i goes from 1 to 9
 		for (int k=0; k<9; k++){ 													
 			if (rowCheck(row, tryNbr) && colCheck(col, tryNbr) && clusterCheck(row, col, tryNbr)) {
-				put(row, col, tryNbr); 													
+				put(row, col, tryNbr);
+				if (row<2 && col<7){
+				System.out.println(row+""+col+" " +tryNbr);
+				}
 				success=true;
 				break;
 			}
@@ -128,7 +131,9 @@ public class sudoku {
 				return true;
 			}
 			while (tryNbr<10){
-				System.out.println(itr.currentRow +""+ itr.currentCol+ " " + tryNbr);
+				if (itr.currentRow<1 && itr.currentCol<9){
+					
+				}
 				//If child solve() fails, it will increase parent solve() by 1 and try again
 				if (solve(itr.currentRow,itr.currentCol)){
 					return true;
@@ -143,63 +148,32 @@ public class sudoku {
 			//The parent witll then return false to it's parent that will increase it's number
 			itr.previous();
 			put(row, col, 0);
-			return false;	
 		}
 		return false;
 	}
 	
-
-	public boolean solveSane(int row, int col, int tryNbr) {
-		boolean success=false;
-		//Handles pre-input values
-		if (get(row,col)>0){
-			itr.next();
-			if (itr.hasNext()){
-				if(solve(itr.currentRow,itr.currentCol)){
-					return true;
-				} else {
-					itr.previous();
+	
+	/**
+	 Checks the input for collisions, if true no collisions exists.
+	 */
+	public boolean precheck(){
+		for (int row=0; row<9; row++){
+			for (int col=0; col<9; col++){
+				int test=matrix[row][col];
+				
+				if (test!=0){
+					matrix[row][col]=0;
+					if (!(rowCheck(row, test) && colCheck(col, test) && clusterCheck(row, col, test))){
 					return false;
 				}
+					matrix[row][col]=test;
+					}
+				
 			}
-			return true;
 		}
-		//Attempts to place a number based on collisions
-		//i goes from 1 to 9
-		for (int k=0; k<9; k++){ 													
-			if (rowCheck(row, tryNbr) && colCheck(col, tryNbr) && clusterCheck(row, col, tryNbr)) {
-				put(row, col, tryNbr); 													
-				success=true;
-				break;
-			}
-			tryNbr++;
-		}
-		//If an int has been placed and there is a next position it will launch Solve() on the next position
-		if (success){
-			itr.next();
-			if (!itr.hasNext()){
-				return true;
-			}
-			if (solve(itr.currentRow,itr.currentCol)){
-				return true;
-			}
-			itr.previous();
-			put(row, col, 0);
-			return false;	
-		}
-		return false;
+		return true;
 	}
 	
-	public boolean solveSaneStart(){
-		for (int i=1; i<10; i++){
-			System.out.println("SolveSane" + i);
-			if (solveSane(0,0,i)){
-				return true;
-			}
-			
-		}
-		return false;
-	}
 	
 	
 	
